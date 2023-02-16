@@ -20,7 +20,6 @@ namespace DataAccessLayer.Repositories
 
         public async Task<ProductDto> Add(ProductDto product, CancellationToken cancellationToken = default)
         {
-            //product.Id = Guid.NewGuid();
             var productEntity = await _dbContext.Products.AddAsync(product, cancellationToken);
             await _dbContext.SaveChangesAsync();
             return productEntity.Entity;
@@ -33,7 +32,6 @@ namespace DataAccessLayer.Repositories
             {
                 query = query.Where(item => item.Name.Contains(request.ItemName));
             }
-            // bottleneck ??
             int totalCount = await query.CountAsync(cancellationToken);
             query = query.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize);
             return (query, totalCount);
@@ -55,17 +53,11 @@ namespace DataAccessLayer.Repositories
 
         public async Task<int> RemoveItemById(Guid id)
         {
-            var product = new ProductDto { Id = id };
-            _dbContext.Attach(product);
-            _dbContext.Entry(product).State = EntityState.Deleted;
-            try
-            {
-                return await _dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                return 0;
-            }
+            var product = await _dbContext.Products.FindAsync(id);
+            if (product == null) return 0;
+
+            _dbContext.Products.Remove(product);
+            return await _dbContext.SaveChangesAsync();
         }
     }
 }

@@ -17,7 +17,6 @@ namespace DataAccessLayer.Repositories
 
         public async Task<BookingDto> Add(BookingDto booking, CancellationToken cancellationToken = default)
         {
-            //booking.Id = Guid.NewGuid();
             var bookingEntity = await _dbContext.Bookings.AddAsync(booking, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
             return bookingEntity.Entity;
@@ -30,7 +29,6 @@ namespace DataAccessLayer.Repositories
             {
                 query = query.Where(item => item.Name.Contains(request.ItemName));
             }
-            // bottleneck ??
             int totalCount = await query.CountAsync(cancellationToken);
             query = query.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize);
             return (query, totalCount);

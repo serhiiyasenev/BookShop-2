@@ -85,16 +85,15 @@ namespace Api.Controllers
             {
                 if (ex.Message.Contains("Not Found"))
                 {
-                    return NotFound(new ProblemDetails { Title = "Not Found by id", Detail = ex.Message });
+                    return NotFound(new ProblemDetails { Title = "Product not found by Id", Detail = ex.Message });
                 }
-                else if (ex.Message.Contains("already linked"))
+
+                if (ex.Message.Contains("already linked"))
                 {
-                    return BadRequest(new ProblemDetails { Title = "Product already linked", Detail = ex.Message });
+                    return BadRequest(new ProblemDetails { Title = "Product already linked to other bookig", Detail = ex.Message });
                 }
-                else
-                {
-                    return StatusCode(500, new ProblemDetails {Title = "Server error", Detail = ex.Message });
-                }
+
+                return StatusCode(500, new ProblemDetails { Title = "Internal Server error", Detail = ex.Message });
             }
         }
 
