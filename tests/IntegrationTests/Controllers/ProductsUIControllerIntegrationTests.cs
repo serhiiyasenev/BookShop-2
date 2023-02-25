@@ -1,9 +1,5 @@
-﻿using Api.Helpers;
-using BusinessLayer.Models.Inbound;
-using BusinessLayer.Models.Outbound;
-using DataAccessLayer;
+﻿using DataAccessLayer;
 using FluentAssertions;
-using static IntegrationTests.Helpers.WebPageHelpers;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,10 +7,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using WebUI;
+using static IntegrationTests.Helpers.WebPageHelpers;
 
 namespace IntegrationTests.Controllers
 {
@@ -47,9 +42,10 @@ namespace IntegrationTests.Controllers
         public async Task CreateProduct_Returns_CreatedMessage()
         {
             // Load Products Page
+            var totalCountRegex = "<label>Total Count: (\\d)</label>";
             var responseProductsPage = await _httpClient.GetAsync($"{_requestUri}");
             responseProductsPage.EnsureSuccessStatusCode();
-            var productsCounterInit = int.Parse(RegexSearch("<label>Total Count: (\\d)</label>", 
+            var productsCounterInit = int.Parse(RegexSearch(totalCountRegex, 
                 await responseProductsPage.Content.ReadAsStringAsync()));
 
             // Load Create Page
@@ -59,7 +55,6 @@ namespace IntegrationTests.Controllers
             var requestVerificationToken = GetRequestVerificationToken(stringResponse);
 
             // Arrange
-            var totalCountRegex = "<label>Total Count: (\\d)</label>";
             var productName = $"Book {DateTime.UtcNow.Ticks}";
             var keyValues = new List<KeyValuePair<string, string>>
             {
