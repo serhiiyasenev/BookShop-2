@@ -14,28 +14,25 @@ using static IntegrationTests.Helpers.WebPageHelpers;
 namespace IntegrationTests.Controllers
 {
     [TestFixture]
-    public class ProductsUIControllerIntegrationTests
+    public class ProductsUIControllerViewIntegrationTests
     {
         private readonly string _requestUri;
         private readonly HttpClient _httpClient;
         private readonly WebApplicationFactory<WebUI.Startup> _factory;
 
-        public ProductsUIControllerIntegrationTests()
+        public ProductsUIControllerViewIntegrationTests()
         {
             _requestUri = "/Products";
             _factory = new WebApplicationFactory<WebUI.Startup>()
                 .WithWebHostBuilder(builder => 
-                builder.ConfigureServices(services =>
-                {
-                    services.RemoveAll(typeof(EfCoreContext));
-                    services.RemoveAll(typeof(DbContextOptions<EfCoreContext>));
-                    
-                    services.AddDbContext<EfCoreContext>(options => options.UseInMemoryDatabase("TestDb"));
-                }
+                    builder.ConfigureServices(services =>
+                    {
+                        services.RemoveAll(typeof(EfCoreContext));
+                        services.RemoveAll(typeof(DbContextOptions<EfCoreContext>));
+                        services.AddDbContext<EfCoreContext>(options => options.UseInMemoryDatabase("TestDb"));
+                    }
             ));
-            _httpClient = _factory.CreateClient(
-                new WebApplicationFactoryClientOptions { AllowAutoRedirect = true } );
-
+            _httpClient = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true } );
         }
 
         [Test]
@@ -58,12 +55,12 @@ namespace IntegrationTests.Controllers
             var productName = $"Book {DateTime.UtcNow.Ticks}";
             var keyValues = new List<KeyValuePair<string, string>>
             {
-            new KeyValuePair<string, string>("Name", productName),
-            new KeyValuePair<string, string>("Description", "Description Test"),
-            new KeyValuePair<string, string>("Author", "Author 1"),
-            new KeyValuePair<string, string>("Price", "19.49"),
-            new KeyValuePair<string, string>("ImageUrl", string.Empty),
-            new KeyValuePair<string, string>(TokenTag, requestVerificationToken)
+                new KeyValuePair<string, string>("Name", productName),
+                new KeyValuePair<string, string>("Description", "Description Test"),
+                new KeyValuePair<string, string>("Author", "Author 1"),
+                new KeyValuePair<string, string>("Price", "19.49"),
+                new KeyValuePair<string, string>("ImageUrl", string.Empty),
+                new KeyValuePair<string, string>(TokenTag, requestVerificationToken)
             };
 
             var formContent = new FormUrlEncodedContent(keyValues);
