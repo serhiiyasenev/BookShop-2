@@ -13,10 +13,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Api
@@ -33,7 +36,21 @@ namespace Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLogging();
+            services.AddLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddJsonConsole(options =>
+                {
+                    // Mask sensitive information in log messages
+                    options.IncludeScopes = true;
+                    options.JsonWriterOptions = new JsonWriterOptions
+                    {
+                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                    };
+                    options.UseUtcTimestamp = true;
+                });
+            });
+
             services.AddHttpContextAccessor();
 
             services.AddScoped<IProductRepository, ProductDbRepository>();

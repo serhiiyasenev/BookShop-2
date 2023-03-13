@@ -55,7 +55,7 @@ namespace InfrastructureLayer.Email.SendGrid
 
         private static string StripHtmlTags(string html)
         {
-            var regex = new Regex("<[^>]+>", RegexOptions.Compiled);
+            var regex = new Regex("<[^>]+>", RegexOptions.Compiled, TimeSpan.FromSeconds(2));
             return regex.Replace(html, string.Empty);
         }
     }

@@ -62,7 +62,7 @@ namespace Api.Controllers
         public async Task<IActionResult> AddProduct(ProductInbound product, CancellationToken cancellationToken = default)
         {
             var createdProduct = await _productService.AddItem(product, cancellationToken);
-            _logger.LogInformation($"Product was created with id: '{createdProduct.Id}'");
+            _logger.LogInformation("Product was created with id: '{Id}'", createdProduct.Id);
             return CreatedAtAction(nameof(AddProduct), createdProduct);
         }
 
@@ -91,12 +91,14 @@ namespace Api.Controllers
 
             if (result.IsSaved)
             {
-                _logger.LogInformation($"Image '{filName}' saved to Image Storage by path '{result.Message}'");
+                _logger.LogInformation("Image '{filName}' saved to Image Storage by path '{message}'",
+                    filName, result.Message);
                 return Ok(new SimpleResult { Result = result.Message });
             }
             else
             {
-                _logger.LogInformation($"Image '{filName}' wasn't saved to Image Storage due to '{result.Message}'");
+                _logger.LogInformation("Image '{filName}' wasn't saved to Image Storage due to '{message}'",
+                    filName, result.Message);
                 return StatusCode(500, new SimpleResult { Result = $"Failed to save image '{filName}' to Image Storage now." });
             }
         }
