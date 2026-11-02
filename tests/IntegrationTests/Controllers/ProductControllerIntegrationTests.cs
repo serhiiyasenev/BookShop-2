@@ -1,10 +1,14 @@
 ﻿using Api;
+using Api.Security;
 using Api.Helpers;
 using BusinessLayer.Models.Inbound;
 using BusinessLayer.Models.Outbound;
 using DataAccessLayer;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -27,15 +31,24 @@ namespace IntegrationTests.Controllers
         {
             _requestUri = "/product";
             _factory = new WebApplicationFactory<Startup>()
-                .WithWebHostBuilder(builder => 
+                .WithWebHostBuilder(builder =>
+                {
+                    builder.ConfigureAppConfiguration((context, configuration) =>
+                    {
+                        configuration.AddInMemoryCollection(new Dictionary<string, string>
+                        {
+                            ["Security:AdminApiKey"] = new string('T', 40)
+                        });
+                    });
                     builder.ConfigureServices(services =>
                     {
                         services.RemoveAll(typeof(EfCoreContext));
                         services.RemoveAll(typeof(DbContextOptions<EfCoreContext>));
                         services.AddDbContext<EfCoreContext>(options => options.UseInMemoryDatabase("TestDb"));
-                    }
-            ));
+                    });
+                });
             _httpClient = _factory.CreateClient();
+            _httpClient.DefaultRequestHeaders.Add(AdminApiKeyAuthorizationFilter.HeaderName, new string('T', 40));
         }
 
         [Test]
@@ -156,6 +169,23 @@ namespace IntegrationTests.Controllers
             // Assert
             deletedProduct.Should().BeOfType<SimpleResult>();
             deletedProduct.Result.Should().Be($"Product with id '{createdProduct.Id}' was deleted");
+        }
+
+        [Test]
+        public async Task AnonymousRequests_AreDeniedForProtectedEndpoints()
+        {
+            using var client = _factory.CreateClient();
+            using var post = await client.PostAsync("/product", JsonHelper.ToStringContent(new ProductInbound
+            {
+                Name = "Untrusted", Author = "Test Author", Description = "Book", Price = 12.56f
+            }));
+            Assert.That(post.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+
+            using var booking = await client.GetAsync("/Booking");
+            Assert.That(booking.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+
+            using var catalog = await client.GetAsync("/product");
+            Assert.That(catalog.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
 
         [OneTimeTearDown]

@@ -1,3 +1,4 @@
+using Api.Security;
 using BusinessLayer.Interfaces;
 using BusinessLayer.Mappings;
 using BusinessLayer.Models.Files;
@@ -76,6 +77,14 @@ namespace Api
 
             services.AddSwaggerGen(options =>
             {
+                options.AddSecurityDefinition("AdminApiKey", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.ApiKey,
+                    In = ParameterLocation.Header,
+                    Name = AdminApiKeyAuthorizationFilter.HeaderName,
+                    Description = "Required for write operations and bookings. Use a server-managed key."
+                });
+                options.OperationFilter<AdminApiKeyOperationFilter>();
                 options.SwaggerDoc("v1", new OpenApiInfo 
                 { 
                     Title = "BookShop", Version = "v1",
