@@ -21,7 +21,7 @@ jobs:
       - name: Install .NET 7 SDK and runtime
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.0.x'
+          dotnet-version: '10.0.x'
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
