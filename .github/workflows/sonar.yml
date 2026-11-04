@@ -19,7 +19,7 @@ jobs:
           java-version: 11
           distribution: 'zulu' # Alternative distribution options are available.
       - name: Install .NET 7 SDK and runtime
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
       - uses: actions/checkout@v4
